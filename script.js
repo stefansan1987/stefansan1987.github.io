@@ -33,6 +33,7 @@ const CURRENT_USER_KEY = 'pietroInventoryCurrentUser';
 const USER_STORAGE_KEY = 'pietroInventoryUsers';
 
 const STORAGE_KEY = 'pietroInventoryItems';
+let inventoryItems = null;
 const DEFAULT_INVENTORY = [
   {
     id: 'demo-1',
@@ -63,19 +64,23 @@ const DEFAULT_INVENTORY = [
 function loadInventory() {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
-    saveInventory(DEFAULT_INVENTORY);
-    return [...DEFAULT_INVENTORY];
+    inventoryItems = [...DEFAULT_INVENTORY];
+    saveInventory(inventoryItems);
+    return inventoryItems;
   }
 
   try {
-    return JSON.parse(stored);
+    inventoryItems = JSON.parse(stored);
+    return inventoryItems;
   } catch {
-    saveInventory(DEFAULT_INVENTORY);
-    return [...DEFAULT_INVENTORY];
+    inventoryItems = [...DEFAULT_INVENTORY];
+    saveInventory(inventoryItems);
+    return inventoryItems;
   }
 }
 
 function saveInventory(items) {
+  inventoryItems = items;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
@@ -116,7 +121,8 @@ function renderStockAlerts(items) {
 }
 
 function renderInventory() {
-  const items = loadInventory().slice();
+  if (inventoryItems === null) inventoryItems = loadInventory();
+  const items = inventoryItems.slice();
   inventoryList.innerHTML = '';
 
   if (items.length === 0) {
@@ -393,7 +399,7 @@ inventoryForm.addEventListener('submit', (event) => {
     return;
   }
 
-  const items = loadInventory();
+  const items = inventoryItems ?? loadInventory();
 
   if (id) {
     const updatedItems = items.map((item) =>
@@ -424,7 +430,7 @@ inventoryList.addEventListener('click', (event) => {
   if (!button) return;
 
   const id = button.dataset.id;
-  const items = loadInventory();
+  const items = inventoryItems ?? loadInventory();
   const item = items.find((entry) => entry.id === id);
   if (!item) return;
 
@@ -475,12 +481,12 @@ clearInventoryButton.addEventListener('click', () => {
 });
 
 exportReorderCsvButton.addEventListener('click', () => {
-  exportReorderCSV(loadInventory());
+  exportReorderCSV(inventoryItems ?? loadInventory());
 });
 
 markOrderedAllButton.addEventListener('click', () => {
   if (confirm('Mark ordered suggested quantities for all low-stock products?')) {
-    markOrderedAll(loadInventory());
+    markOrderedAll(inventoryItems ?? loadInventory());
   }
 });
 
@@ -533,6 +539,7 @@ function updateAuthState() {
   document.documentElement.classList.toggle('locked', !authed);
   setInventoryAccess(authed);
   renderUserList();
+  renderInventory();
 }
 
 if (authForm) {
@@ -560,6 +567,7 @@ if (logoutButton) {
     localStorage.removeItem(AUTH_KEY);
     localStorage.removeItem(CURRENT_USER_KEY);
     updateAuthState();
+    renderInventory();
   });
 }
 
@@ -614,5 +622,5 @@ if (form) {
   });
 }
 
-renderInventory();
+inventoryItems = loadInventory();
 updateAuthState();
