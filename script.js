@@ -41,6 +41,8 @@ let inventoryItems = null;
 const firebaseConfig = {
   apiKey: "AIzaSyCQkPv5oacAdqVwzqluo2mnd531Jvz1azE",
   authDomain: "pietros-inventory.firebaseapp.com",
+  projectId: "pietros-inventory",
+  databaseURL: "https://pietros-inventory-default-rtdb.firebaseio.com",
     storageBucket: "pietros-inventory.firebasestorage.app",
   messagingSenderId: "736356040857",
   appId: "1:736356040857:web:c1bb1d4af1a152f8ffb808",
